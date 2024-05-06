@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <pthread.h>
 
 void armazenaMatriz(char *nomeArq, int *matriz, int numLinCol);
 void somaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol);
