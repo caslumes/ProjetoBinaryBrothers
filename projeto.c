@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+#include "func_threads.h"
 
-void armazenaMatriz(char *nomeArq, int *matriz, int numLinCol);
+void *leMatriz(void *args);
 void somaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol);
 void multiplicaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol);
 int reduzMatriz(int *matriz, int numLinCol);
@@ -14,8 +15,10 @@ int main(int argc, char *argv[]){
     int numThreads = atoi(argv[1]);
     int numLinCol = atoi(argv[2]);
     int *matrizA, *matrizB, *matrizC, *matrizD, *matrizE;
+
     clock_t inicio, fim, inicioFuncao, fimFuncao;
     double tempoSoma, tempoMultiplicacao, tempoReducao, tempoTotal;
+
     inicio = clock();
     matrizA = malloc(numLinCol*numLinCol*(sizeof(int)));
     matrizB = malloc(numLinCol*numLinCol*(sizeof(int)));
@@ -23,17 +26,54 @@ int main(int argc, char *argv[]){
     matrizD = malloc(numLinCol*numLinCol*(sizeof(int)));
     matrizE = malloc(numLinCol*numLinCol*(sizeof(int)));
 
-    armazenaMatriz(argv[3], matrizA, numLinCol);
-    armazenaMatriz(argv[4], matrizB, numLinCol);
+    if(numThreads == 1){
+        parametrosThreads *parametros[2];
+        parametros[0]->nome = argv[3];
+        parametros[0]->matriz = matrizA;
+        parametros[0]->numLinCol = numLinCol;
+
+        parametros[1]->nome = argv[4];
+        parametros[1]->matriz = matrizB;
+        parametros[1]->numLinCol = numLinCol;
+        leMatriz(parametros[0]);
+        leMatriz(parametros[1]);
+    }else{
+        pthread_t threadPrincipal, outrasThreads[2];
+        threadPrincipal = pthread_self();
+
+        parametrosThreads *parametros[2];
+        parametros[0]->nome = argv[3];
+        parametros[0]->matriz = matrizA;
+        parametros[0]->numLinCol = numLinCol;
+
+        parametros[1]->nome = argv[4];
+        parametros[1]->matriz = matrizB;
+        parametros[1]->numLinCol = numLinCol;
+
+        pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[0]);
+        pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[1]);
+
+    }
+
 
     inicioFuncao = clock();
     somaMatriz(matrizA, matrizB, matrizD, numLinCol);
     fimFuncao = clock() - inicioFuncao;
     tempoSoma = ((double) fimFuncao)/CLOCKS_PER_SEC;
 
-    gravaMatriz(argv[6], matrizD, numLinCol);
+    if(numThreads = 1){
+        parametrosThreads *parametros[2];
+        parametros[0]->nome = argv[6];
+        parametros[0]->matriz = matrizD;
+        parametros[0]->numLinCol = numLinCol;
 
-    armazenaMatriz(argv[5], matrizC, numLinCol);
+        parametros[1]->nome = argv[5];
+        parametros[1]->matriz = matrizC;
+        parametros[1]->numLinCol = numLinCol;
+
+        gravaMatriz(argv[6], matrizD, numLinCol);
+        leMatriz(parametros[1]);
+    }
 
     inicioFuncao = clock();
     multiplicaMatriz(matrizC, matrizD, matrizE, numLinCol);
@@ -64,24 +104,28 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-void armazenaMatriz(char *nomeArq, int *matriz, int numLinCol){
+void *leMatriz(void *args){
+    char *nomeArq = ((parametrosThreads *) args)->nome;
+    int *matriz = ((parametrosThreads *) args)->matriz;
+    int numLinCol = ((parametrosThreads *) args)->numLinCol;
     FILE *arq = fopen(nomeArq, "r");
-    for(int i=0; i<numLinCol; i++){
+    for(register int i=0; i<numLinCol; i++){
         for(int j=0; j<numLinCol; j++)
             fscanf(arq, "%d ", &matriz[i*numLinCol+j]);
     }
     fclose(arq);
+    pthread_exit(NULL);
 }
 
 void somaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol){
-    for(int i=0; i<numLinCol*numLinCol; i++){
+    for(register int i=0; i<numLinCol*numLinCol; i++){
         matrizResultante[i] = matriz1[i] + matriz2[i];
     }
 }
 
 void multiplicaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol){
-    for(int i=0; i<numLinCol; i++){
-        for(int j=0; j<numLinCol; j++){
+    for(register int i=0; i<numLinCol; i++){
+        for(register int j=0; j<numLinCol; j++){
             int somaMul = 0;
             for(int k=0; k<numLinCol; k++)
                 somaMul += matriz1[i*numLinCol+k] * matriz2[j*numLinCol+k];
@@ -92,7 +136,7 @@ void multiplicaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int num
 
 int reduzMatriz(int *matriz, int numLinCol){
     int reducao = 0;
-    for(int i=0; i<numLinCol*numLinCol; i++)
+    for(register int i=0; i<numLinCol*numLinCol; i++)
         reducao += matriz[i];
     
     return reducao;
@@ -100,8 +144,8 @@ int reduzMatriz(int *matriz, int numLinCol){
 
 void gravaMatriz(char *nomeArq, int *matriz, int numLinCol){
     FILE *arq = fopen(nomeArq, "w");
-    for(int i=0; i<numLinCol; i++){
-        for(int j=0; j<numLinCol; j++)
+    for(register int i=0; i<numLinCol; i++){
+        for(register int j=0; j<numLinCol; j++)
             fprintf(arq, "%d ", matriz[i*numLinCol+j]);
         fprintf(arq, "\n");
     }
