@@ -4,8 +4,7 @@
 
 typedef struct {
     pthread_t tidPrincipal;
-    char* nome;
-    int* matriz;
+    int *matrizA, *matrizB, *matrizC, *matrizD, *matrizE;
     int numLinCol;
 } parametrosThreads;
 

@@ -10,6 +10,10 @@ void multiplicaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int num
 int reduzMatriz(int *matriz, int numLinCol);
 void gravaMatriz(char *nomeArq, int *matriz, int numLinCol);
 
+typedef struct {
+
+} parametrosLeitura;
+
 int main(int argc, char *argv[]){
     int reducao;
     int numThreads = atoi(argv[1]);
@@ -18,6 +22,7 @@ int main(int argc, char *argv[]){
 
     clock_t inicio, fim, inicioFuncao, fimFuncao;
     double tempoSoma, tempoMultiplicacao, tempoReducao, tempoTotal;
+    parametrosLeitura *paramLer;
 
     inicio = clock();
     matrizA = malloc(numLinCol*numLinCol*(sizeof(int)));
@@ -27,34 +32,11 @@ int main(int argc, char *argv[]){
     matrizE = malloc(numLinCol*numLinCol*(sizeof(int)));
 
     if(numThreads == 1){
-        printf("Definindo parametros thread MatrizA.\n");
-        parametrosThreads *parametros[2];
-        printf("Vetor de parâmetros inicializado.\n");
-        parametros[0]->nome = argv[3];
-        printf("Nome do primeiro arquivo definido.\n");
-        parametros[0]->matriz = matrizA;
-        parametros[0]->numLinCol = numLinCol;
-
-        printf("Definindo parametros thread MatrizB.\n");
-        parametros[1]->nome = argv[4];
-        parametros[1]->matriz = matrizB;
-        parametros[1]->numLinCol = numLinCol;
-        leMatriz(parametros[0]);
-        leMatriz(parametros[1]);
+        leMatriz(paramLer);
+        leMatriz(paramLer);
     }else{
         pthread_t threadPrincipal, outrasThreads[2];
         threadPrincipal = pthread_self();
-
-        parametrosThreads *parametros[2];
-        parametros[0]->tidPrincipal = threadPrincipal;
-        parametros[0]->nome = argv[3];
-        parametros[0]->matriz = matrizA;
-        parametros[0]->numLinCol = numLinCol;
-
-        parametros[0]->tidPrincipal = threadPrincipal;
-        parametros[1]->nome = argv[4];
-        parametros[1]->matriz = matrizB;
-        parametros[1]->numLinCol = numLinCol;
 
         pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[0]);
         pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[1]);
