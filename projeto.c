@@ -27,11 +27,15 @@ int main(int argc, char *argv[]){
     matrizE = malloc(numLinCol*numLinCol*(sizeof(int)));
 
     if(numThreads == 1){
+        printf("Definindo parametros thread MatrizA.\n");
         parametrosThreads *parametros[2];
+        printf("Vetor de parâmetros inicializado.\n");
         parametros[0]->nome = argv[3];
+        printf("Nome do primeiro arquivo definido.\n");
         parametros[0]->matriz = matrizA;
         parametros[0]->numLinCol = numLinCol;
 
+        printf("Definindo parametros thread MatrizB.\n");
         parametros[1]->nome = argv[4];
         parametros[1]->matriz = matrizB;
         parametros[1]->numLinCol = numLinCol;
@@ -42,10 +46,12 @@ int main(int argc, char *argv[]){
         threadPrincipal = pthread_self();
 
         parametrosThreads *parametros[2];
+        parametros[0]->tidPrincipal = threadPrincipal;
         parametros[0]->nome = argv[3];
         parametros[0]->matriz = matrizA;
         parametros[0]->numLinCol = numLinCol;
 
+        parametros[0]->tidPrincipal = threadPrincipal;
         parametros[1]->nome = argv[4];
         parametros[1]->matriz = matrizB;
         parametros[1]->numLinCol = numLinCol;
@@ -53,15 +59,15 @@ int main(int argc, char *argv[]){
         pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[0]);
         pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[1]);
 
-    }
 
+    }
 
     inicioFuncao = clock();
     somaMatriz(matrizA, matrizB, matrizD, numLinCol);
     fimFuncao = clock() - inicioFuncao;
     tempoSoma = ((double) fimFuncao)/CLOCKS_PER_SEC;
 
-    if(numThreads = 1){
+    if(numThreads == 1){
         parametrosThreads *parametros[2];
         parametros[0]->nome = argv[6];
         parametros[0]->matriz = matrizD;
@@ -105,16 +111,21 @@ int main(int argc, char *argv[]){
 }
 
 void *leMatriz(void *args){
+    printf("Lendo matriz...\n");
+    pthread_t tidPrincipal = ((parametrosThreads *) args)->tidPrincipal;
     char *nomeArq = ((parametrosThreads *) args)->nome;
     int *matriz = ((parametrosThreads *) args)->matriz;
     int numLinCol = ((parametrosThreads *) args)->numLinCol;
+    pthread_t tidThread = pthread_self();
+
     FILE *arq = fopen(nomeArq, "r");
     for(register int i=0; i<numLinCol; i++){
         for(int j=0; j<numLinCol; j++)
             fscanf(arq, "%d ", &matriz[i*numLinCol+j]);
     }
     fclose(arq);
-    pthread_exit(NULL);
+    
+    if(pthread_equal(tidPrincipal, tidThread) == 0){pthread_exit(NULL);}
 }
 
 void somaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol){
