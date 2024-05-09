@@ -41,7 +41,6 @@ int main(int argc, char *argv[]){
         pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[0]);
         pthread_create(&outrasThreads[0], NULL, leMatriz, parametros[1]);
 
-
     }
 
     inicioFuncao = clock();
