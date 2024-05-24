@@ -304,3 +304,191 @@ void gravarLerMatrizes(int* matrizGravar, int* matrizLer, char* nomeArqMatrizGra
         }
     }
 }
+
+void* threadMultiplicacao(void* args){
+    register unsigned int i, j, k, inicio, fim, numLinCol;
+    int *matriz1, *matriz2, *matrizResultante;
+
+    inicio = ((parametrosSomaMul*) args)->inicioThread;
+    fim = ((parametrosSomaMul*) args)->fimThread;
+    matriz1 = ((parametrosSomaMul*) args)->matriz1;
+    matriz2 = ((parametrosSomaMul*) args)->matriz2;
+    matrizResultante = ((parametrosSomaMul*) args)->matrizResultante;
+    numLinCol = ((parametrosSomaMul*) args)->numLinCol;
+
+    for(i=inicio; i<=fim; i++){
+        for(j=inicio; j<=fim; j++){
+            int somaMul = 0;
+            for(k=0; k<numLinCol; k++)
+                somaMul += matriz1[i*numLinCol+k] * matriz2[j*numLinCol+k];
+            matrizResultante[i*numLinCol+j] = somaMul;
+        }
+    }
+
+    return NULL;
+}
+
+void multiplicaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned int numLinCol, unsigned int numThreads){
+    parametrosSomaMul* parametros;
+    pthread_t* idsThreads;
+    register unsigned int i, numElementos;
+    int err;
+
+    parametros = alocaVetorParametrosThreadsSomaMul(numThreads);
+    idsThreads = alocaVetorIdsThreads(numThreads);
+
+    if(numLinCol % numThreads != 0){
+        fprintf(stderr, "O numero de elementos da matriz nao eh divisivel pelo numero de threads.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    numElementos = numLinCol/numThreads;
+
+    for(i=0; i<numThreads; i++){
+        parametros[i].inicioThread = numElementos*i;
+        parametros[i].fimThread = numElementos*(i+1) - 1;
+        parametros[i].matriz1 = matriz1;
+        parametros[i].matriz2 = matriz2;
+        parametros[i].matrizResultante = matrizResultante;
+        parametros[i].numLinCol = numLinCol;
+
+        err = pthread_create(&idsThreads[i], NULL, threadMultiplicacao, (void*) &parametros[i]);
+
+        if(err != 0){
+            fprintf(stderr, "Erro na criacao do thread de soma.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    for(i=0; i<numThreads; i++){
+        err = pthread_join(idsThreads[i], NULL);
+
+        if(err != 0){
+            fprintf(stderr, "Erro na juncao do thread de multiplicacao.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+void* threadReducao(void* args){
+    register unsigned int i, inicio, fim;
+    int *soma;
+    int* matriz;
+
+    inicio = ((parametrosSomaMul*) args)->inicioThread;
+    fim = ((parametrosSomaMul*) args)->fimThread;
+    matriz = ((parametrosSomaMul*) args)->matriz1;
+
+    if((soma = (int*) malloc(sizeof(int))) == NULL){
+        fprintf(stderr, "Problemas na alocacao da soma.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    *soma = 0;
+
+    for(i = inicio; i <= fim; i++){
+        *soma += matriz[i];
+    }
+
+    return ((void*) soma);
+}
+
+int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads){
+    parametrosLerGravar* parametrosGravar;
+    parametrosSomaMul* parametrosReducao;
+    pthread_t* idsThreads;
+    int err;
+    void* reducaoParcial = NULL;
+    int reducao = 0;
+
+    parametrosGravar = alocaVetorParametrosThreadsLeitura(1);
+    
+    unsigned int numAlocaThreads;
+    if(numThreads == 1){numAlocaThreads = 2;}else{numAlocaThreads = numThreads+1;}
+
+    idsThreads = alocaVetorIdsThreads(numAlocaThreads);
+
+    parametrosGravar[0].matriz = matriz;
+    parametrosGravar[0].nomeArqMatriz = nomeArqMatriz;
+    parametrosGravar[0].numLinCol = numLinCol;
+
+    if(numThreads == 1){
+        parametrosReducao = alocaVetorParametrosThreadsSomaMul(1);
+        parametrosReducao[0].inicioThread = 0;
+        parametrosReducao[0].fimThread = numLinCol-1;
+        parametrosReducao[0].matriz1 = matriz;
+
+        err = pthread_create(&idsThreads[0], NULL, threadGravaMatriz, (void*) &parametrosGravar[0]); 
+        if(err != 0){
+            fprintf(stderr, "Erro na criacao do thread de escrita.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        err = pthread_join(idsThreads[0], NULL);
+        if(err != 0){
+            fprintf(stderr, "Erro na juncao do thread de escrita.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        err = pthread_create(&idsThreads[1], NULL, threadReducao, (void*) &parametrosReducao[0]); 
+        if(err != 0){
+            fprintf(stderr, "Erro na criacao do thread de leitura.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        err = pthread_join(idsThreads[1], &reducaoParcial);
+        if(err != 0){
+            fprintf(stderr, "Erro na juncao do thread de leitura.\n");
+            exit(EXIT_FAILURE);
+        }
+        reducao = *((int*)reducaoParcial);
+    }else{
+        register unsigned int i, numElementos;
+        parametrosReducao = alocaVetorParametrosThreadsSomaMul(numThreads);
+
+        if((numLinCol*numLinCol) % numThreads != 0){
+            fprintf(stderr, "O numero de elementos da matriz nao eh divisivel pelo numero de threads.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        err = pthread_create(&idsThreads[0], NULL, threadGravaMatriz, (void*) &parametrosGravar[0]); 
+        if(err != 0){
+            fprintf(stderr, "Erro na criacao do thread de escrita.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        numElementos = (numLinCol*numLinCol)/numThreads;
+
+        for(i=0; i<numThreads; i++){
+            parametrosReducao[i].inicioThread = numElementos*i;
+            parametrosReducao[i].fimThread = numElementos*(i+1) - 1;
+            parametrosReducao[i].matriz1 = matriz;
+
+            err = pthread_create(&idsThreads[i+1], NULL, threadReducao, (void*) &parametrosReducao[i]);
+
+            if(err != 0){
+                fprintf(stderr, "Erro na criacao do thread de reducao.\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        err = pthread_join(idsThreads[0], NULL);
+        if(err != 0){
+            fprintf(stderr, "Erro na juncao do thread de escrita.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        for(i=1; i<numThreads+1; i++){
+            err = pthread_join(idsThreads[i], &reducaoParcial);
+
+            if(err != 0){
+                fprintf(stderr, "Erro na juncao do thread de reducao.\n");
+                exit(EXIT_FAILURE);
+            }
+
+            reducao = *((int*) reducaoParcial);
+        }
+
+    }
+    return reducao;
+}

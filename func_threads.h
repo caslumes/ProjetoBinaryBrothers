@@ -5,6 +5,7 @@
 typedef struct {
     unsigned int inicioThread;
     unsigned int fimThread;
+    unsigned int numLinCol;
     int *matriz1, *matriz2, *matrizResultante;
 } parametrosSomaMul;
 
@@ -26,5 +27,11 @@ void somaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned in
 
 void* threadGravaMatriz(void* args);
 void gravarLerMatrizes(int* matrizGravar, int* matrizLer, char* nomeArqMatrizGravar, char*nomeArqMatrizLer, unsigned int numLinCol, unsigned int numThreads);
+
+void* threadMultiplicacao(void* args);
+void multiplicaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned int numLinCol, unsigned int numThreads);
+
+void* threadReducao(void* args);
+int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads);
 
 #endif
