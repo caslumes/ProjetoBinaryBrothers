@@ -6,7 +6,6 @@
 
 void multiplicaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol);
 int reduzMatriz(int *matriz, int numLinCol);
-void gravaMatriz(char *nomeArq, int *matriz, int numLinCol);
 
 int main(int argc, char *argv[]){
     int reducao=0;
@@ -14,7 +13,7 @@ int main(int argc, char *argv[]){
     unsigned int numLinCol = atoi(argv[2]);
     int *matrizA, *matrizB, *matrizC, *matrizD, *matrizE;
     char *nomeArqMatrizA, *nomeArqMatrizB, *nomeArqMatrizC, *nomeArqMatrizD, *nomeArqMatrizE;
-
+    clock_t inicio, fim, inicioFun, fimFun;
     double tempoSoma=0, tempoMultiplicacao=0, tempoReducao=0, tempoTotal=0;
 
     matrizA = alocaMatriz(numLinCol);
@@ -32,11 +31,19 @@ int main(int argc, char *argv[]){
 
     int* matrizes[2] = {matrizA, matrizB};
     char* nomesMatrizes[2] = {nomeArqMatrizA, nomeArqMatrizB};
+
+    inicio = clock();
     leMatriz(2, matrizes, nomesMatrizes, numLinCol, numThreads);
 
+    inicioFun = clock();
     somaMatrizes(matrizA, matrizB, matrizD, numLinCol, numThreads);
+    fimFun = clock() - inicioFun;
+    tempoSoma = ((double) fimFun)/CLOCKS_PER_SEC;
 
     gravarLerMatrizes(matrizD, matrizC, nomeArqMatrizD, nomeArqMatrizC, numLinCol, numThreads);
+
+    fim = clock() - inicio;
+    tempoTotal = ((double) fim)/CLOCKS_PER_SEC;
 
     printf("Redução: %d\n\n", reducao);
     printf("Tempo soma: %.3f segundos.\n\n", tempoSoma);
