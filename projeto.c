@@ -34,26 +34,21 @@ int main(int argc, char *argv[]){
 
     inicio = clock();
     leMatriz(2, matrizes, nomesMatrizes, numLinCol, numThreads);
-    printf("Leitura matrizA e matrizB feita.\n");
 
     inicioFun = clock();
     somaMatrizes(matrizA, matrizB, matrizD, numLinCol, numThreads);
     fimFun = clock() - inicioFun;
     tempoSoma = ((double) fimFun)/CLOCKS_PER_SEC;
-    printf("Soma matrizA e matrizB feita.\n");
 
     gravarLerMatrizes(matrizD, matrizC, nomeArqMatrizD, nomeArqMatrizC, numLinCol, numThreads);
-    printf("Gravação matrizD e leitura matrizC feita.\n");
 
     inicioFun = clock();
     multiplicaMatrizes(matrizC, matrizD, matrizE, numLinCol, numThreads);
-    printf("Multiplicação matrizC e matrizD feita.\n");
     fimFun = clock() - inicioFun;
     tempoMultiplicacao = ((double) fimFun)/CLOCKS_PER_SEC;
 
     inicioFun = clock();
     reducao = gravarReduzirMatriz(matrizE, nomeArqMatrizE, numLinCol, numThreads);
-    printf("Gravação e redução matrizE feita.\n");
     fimFun = clock() - inicioFun;
     tempoReducao = ((double) fimFun)/CLOCKS_PER_SEC;
 

@@ -317,10 +317,11 @@ void* threadMultiplicacao(void* args){
     numLinCol = ((parametrosSomaMul*) args)->numLinCol;
 
     for(i=inicio; i<=fim; i++){
-        for(j=inicio; j<=fim; j++){
+        for(j=0; j<numLinCol; j++){
             int somaMul = 0;
-            for(k=0; k<numLinCol; k++)
+            for(k=0; k<numLinCol; k++){
                 somaMul += matriz1[i*numLinCol+k] * matriz2[j*numLinCol+k];
+            }
             matrizResultante[i*numLinCol+j] = somaMul;
         }
     }
@@ -355,7 +356,7 @@ void multiplicaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsig
         err = pthread_create(&idsThreads[i], NULL, threadMultiplicacao, (void*) &parametros[i]);
 
         if(err != 0){
-            fprintf(stderr, "Erro na criacao do thread de soma.\n");
+            fprintf(stderr, "Erro na criacao do thread de multiplicacao.\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -415,7 +416,7 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
     if(numThreads == 1){
         parametrosReducao = alocaVetorParametrosThreadsSomaMul(1);
         parametrosReducao[0].inicioThread = 0;
-        parametrosReducao[0].fimThread = numLinCol-1;
+        parametrosReducao[0].fimThread = (numLinCol*numLinCol)-1;
         parametrosReducao[0].matriz1 = matriz;
 
         err = pthread_create(&idsThreads[0], NULL, threadGravaMatriz, (void*) &parametrosGravar[0]); 
@@ -486,7 +487,7 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
                 exit(EXIT_FAILURE);
             }
 
-            reducao = *((int*) reducaoParcial);
+            reducao += *((int*) reducaoParcial);
         }
 
     }
