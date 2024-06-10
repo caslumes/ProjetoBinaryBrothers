@@ -4,9 +4,6 @@
 #include <pthread.h>
 #include "func_threads.h"
 
-void multiplicaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol);
-int reduzMatriz(int *matriz, int numLinCol);
-
 int main(int argc, char *argv[]){
     int reducao=0;
     unsigned int numThreads = atoi(argv[1]);
@@ -68,23 +65,4 @@ int main(int argc, char *argv[]){
     free(matrizE);
 
     return 0;
-}
-
-void multiplicaMatriz(int *matriz1, int *matriz2, int *matrizResultante, int numLinCol){
-    for(register int i=0; i<numLinCol; i++){
-        for(register int j=0; j<numLinCol; j++){
-            int somaMul = 0;
-            for(int k=0; k<numLinCol; k++)
-                somaMul += matriz1[i*numLinCol+k] * matriz2[j*numLinCol+k];
-            matrizResultante[i*numLinCol+j] = somaMul;
-        }
-    }
-}
-
-int reduzMatriz(int *matriz, int numLinCol){
-    int reducao = 0;
-    for(register int i=0; i<numLinCol*numLinCol; i++)
-        reducao += matriz[i];
-    
-    return reducao;
 }
