@@ -69,11 +69,16 @@ void* threadLeMatriz(void* args){
     register unsigned int numLinCol = ((parametrosLerGravar*) args)->numLinCol;
 
     FILE *arq = fopen(nomeArq, "r");
+    if(arq==NULL){
+        fprintf(stderr, "Problemas ao abrir o arquivo %s.\n", nomeArq);
+    }
+
     for(register int i=0; i<numLinCol; i++){
         for(register int j=0; j<numLinCol; j++){
             fscanf(arq, "%d ", &matriz[i*numLinCol+j]);
         }
     }
+
     fclose(arq);
 
     return NULL;
@@ -201,6 +206,11 @@ void* threadGravaMatriz(void* args){
     register unsigned int numLinCol = ((parametrosLerGravar*) args)->numLinCol;
 
     FILE *arq = fopen(nomeArq, "w");
+    
+    if(arq==NULL){
+        fprintf(stderr, "Problemas ao abrir o arquivo %s.\n", nomeArq);
+    }
+
     for(register int i=0; i<numLinCol; i++){
         for(register int j=0; j<numLinCol; j++)
             fprintf(arq, "%d ", matriz[i*numLinCol+j]);
