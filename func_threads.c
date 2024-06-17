@@ -129,7 +129,11 @@ void leMatriz(unsigned int numMatrizes, int** matrizes, char** nomesMatrizes, un
                 exit(EXIT_FAILURE);
             }
         }
+
+        free(idsThreads);
     }
+
+    free(parametros);
 }
 
 void* threadSoma(void* args){
@@ -198,6 +202,9 @@ void somaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned in
             }
         }
     }
+    
+    free(parametros);
+    free(idsThreads);
 }
 
 void* threadGravaMatriz(void* args){
@@ -262,7 +269,11 @@ void gravarLerMatrizes(int* matrizGravar, int* matrizLer, char* nomeArqMatrizGra
                 exit(EXIT_FAILURE);
             }
         }
+
+        free(idsThreads);
     }
+
+    free(parametros);
 }
 
 void* threadMultiplicacao(void* args){
@@ -341,7 +352,11 @@ void multiplicaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsig
                 exit(EXIT_FAILURE);
             }
         }
+
+        free(idsThreads);
     }
+
+    free(parametros);
 }
 
 void* threadReducao(void* args){
@@ -430,6 +445,11 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
             reducao += *((int*) reducaoParcial);
         }
 
+        free(idsThreads);
     }
+
+    free(parametrosGravar);
+    free(parametrosReducao);
+
     return reducao;
 }
