@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
 
 int *alocaMatriz(unsigned int numLinCol){
     int* matriz;
@@ -382,9 +383,10 @@ void* threadReducao(void* args){
     return ((void*) soma);
 }
 
-int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads){
+int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads, double tempoRed){
     parametrosLerGravar* parametrosGravar;
     parametrosSomaMul* parametrosReducao;
+    clock_t inicioRed, fimRed;
     
     void* reducaoParcial = NULL;
     int reducao = 0;
@@ -402,7 +404,13 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
         parametrosReducao[0].matriz1 = matriz;
 
         threadGravaMatriz((void*) &parametrosGravar[0]);
-        reducaoParcial = threadReducao((void*) &parametrosReducao[0]); 
+
+        inicioRed = clock();
+        reducaoParcial = threadReducao((void*) &parametrosReducao[0]);
+        fimRed = clock() - inicioRed;
+
+        tempoRed = ((double) fimRed)/CLOCKS_PER_SEC;
+
         reducao = *((int*)reducaoParcial);
     }else{
         pthread_t* idsThreads;
@@ -410,7 +418,7 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
 
         register unsigned int i, numElementos;
         parametrosReducao = alocaVetorParametrosThreadsSomaMul(numThreads);
-        idsThreads = alocaVetorIdsThreads(numThreads);
+        idsThreads = alocaVetorIdsThreads(numThreads+1);
 
         if((numLinCol*numLinCol) % numThreads != 0){
             fprintf(stderr, "O numero de elementos da matriz nao eh divisivel pelo numero de threads.\n");
@@ -419,7 +427,16 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
 
         numElementos = (numLinCol*numLinCol)/numThreads;
 
-        for(i=0; i<numThreads; i++){
+        err = pthread_create(&idsThreads[0], NULL, threadGravaMatriz, (void*) &parametrosGravar[0]);
+
+        if(err != 0){
+            fprintf(stderr, "Erro na criacao do thread de gravacao.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        inicioRed = clock();
+
+        for(i=1; i<numThreads+1; i++){
             parametrosReducao[i].inicioThread = numElementos*i;
             parametrosReducao[i].fimThread = numElementos*(i+1) - 1;
             parametrosReducao[i].matriz1 = matriz;
@@ -432,9 +449,7 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
             }
         }
 
-        threadGravaMatriz((void*) &parametrosGravar[0]);
-
-        for(i=0; i<numThreads; i++){
+        for(i=1; i<numThreads+1; i++){
             err = pthread_join(idsThreads[i], &reducaoParcial);
 
             if(err != 0){
@@ -445,7 +460,18 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
             reducao += *((int*) reducaoParcial);
         }
 
+        fimRed = clock() - inicioRed;
+
+        err = pthread_join(idsThreads[0], NULL);
+
+        if(err != 0){
+            fprintf(stderr, "Erro na juncao do thread de gravacao.\n");
+            exit(EXIT_FAILURE);
+        }
+
         free(idsThreads);
+
+        tempoRed = ((double) fimRed)/CLOCKS_PER_SEC;
     }
 
     free(parametrosGravar);

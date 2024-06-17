@@ -44,10 +44,7 @@ int main(int argc, char *argv[]){
     fimFun = clock() - inicioFun;
     tempoMultiplicacao = ((double) fimFun)/CLOCKS_PER_SEC;
 
-    inicioFun = clock();
-    reducao = gravarReduzirMatriz(matrizE, nomeArqMatrizE, numLinCol, numThreads);
-    fimFun = clock() - inicioFun;
-    tempoReducao = ((double) fimFun)/CLOCKS_PER_SEC;
+    reducao = gravarReduzirMatriz(matrizE, nomeArqMatrizE, numLinCol, numThreads, tempoReducao);
 
     fim = clock() - inicio;
     tempoTotal = ((double) fim)/CLOCKS_PER_SEC;
