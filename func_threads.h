@@ -32,6 +32,6 @@ void* threadMultiplicacao(void* args);
 void multiplicaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned int numLinCol, unsigned int numThreads);
 
 void* threadReducao(void* args);
-int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads, double tempoRed);
+int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads, double *tempoRed);
 
 #endif

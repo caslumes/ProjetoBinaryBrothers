@@ -383,7 +383,7 @@ void* threadReducao(void* args){
     return ((void*) soma);
 }
 
-int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads, double tempoRed){
+int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads, double *tempoRed){
     parametrosLerGravar* parametrosGravar;
     parametrosSomaMul* parametrosReducao;
     clock_t inicioRed, fimRed;
@@ -409,7 +409,7 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
         reducaoParcial = threadReducao((void*) &parametrosReducao[0]);
         fimRed = clock() - inicioRed;
 
-        tempoRed = ((double) fimRed)/CLOCKS_PER_SEC;
+        *tempoRed = ((double) fimRed)/CLOCKS_PER_SEC;
 
         reducao = *((int*)reducaoParcial);
     }else{
@@ -471,7 +471,7 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
 
         free(idsThreads);
 
-        tempoRed = ((double) fimRed)/CLOCKS_PER_SEC;
+        *tempoRed = ((double) fimRed)/CLOCKS_PER_SEC;
     }
 
     free(parametrosGravar);
