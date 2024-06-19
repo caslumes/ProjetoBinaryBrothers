@@ -1,9 +1,9 @@
 #include <stdio.h>
-#define numLinCol 1000
 
 void criaMatriz(int numeroLinhaColuna, char letra);
 
-int main(){
+int main(int argc, char* argv[]){
+    int numLinCol = atoi(argv[1]);
     criaMatriz(numLinCol, 'A');
     criaMatriz(numLinCol, 'B');
     criaMatriz(numLinCol, 'C');
