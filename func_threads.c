@@ -436,12 +436,12 @@ int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol
 
         inicioRed = clock();
 
-        for(i=1; i<numThreads+1; i++){
+        for(i=0; i<numThreads; i++){
             parametrosReducao[i].inicioThread = numElementos*i;
             parametrosReducao[i].fimThread = numElementos*(i+1) - 1;
             parametrosReducao[i].matriz1 = matriz;
 
-            err = pthread_create(&idsThreads[i], NULL, threadReducao, (void*) &parametrosReducao[i]);
+            err = pthread_create(&idsThreads[i+1], NULL, threadReducao, (void*) &parametrosReducao[i]);
 
             if(err != 0){
                 fprintf(stderr, "Erro na criacao do thread de reducao.\n");
