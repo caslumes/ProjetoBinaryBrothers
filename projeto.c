@@ -5,6 +5,11 @@
 #include "func_threads.h"
 
 int main(int argc, char *argv[]){
+    if(argc < 8){
+        fprintf(stderr, "Numero de argumentos invalido.");
+        exit(EXIT_FAILURE);
+    }
+
     int reducao=0;
     unsigned int numThreads = atoi(argv[1]);
     unsigned int numLinCol = atoi(argv[2]);
