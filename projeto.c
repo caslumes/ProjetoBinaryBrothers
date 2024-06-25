@@ -29,13 +29,9 @@ int main(int argc, char *argv[]){
     nomeArqMatrizC = argv[5];
     nomeArqMatrizD = argv[6];
     nomeArqMatrizE = argv[7];
-    
-
-    int* matrizes[2] = {matrizA, matrizB};
-    char* nomesMatrizes[2] = {nomeArqMatrizA, nomeArqMatrizB};
 
     inicio = clock();
-    leMatriz(2, matrizes, nomesMatrizes, numLinCol, numThreads);
+    leMatriz(matrizA, matrizB, nomeArqMatrizA, nomeArqMatrizB, numLinCol, numThreads);
 
     inicioFun = clock();
     somaMatrizes(matrizA, matrizB, matrizD, numLinCol, numThreads);

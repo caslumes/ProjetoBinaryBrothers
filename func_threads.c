@@ -72,6 +72,7 @@ void* threadLeMatriz(void* args){
     FILE *arq = fopen(nomeArq, "r");
     if(arq==NULL){
         fprintf(stderr, "Problemas ao abrir o arquivo %s.\n", nomeArq);
+        exit(EXIT_FAILURE);
     }
 
     for(register int i=0; i<numLinCol; i++){
@@ -85,42 +86,37 @@ void* threadLeMatriz(void* args){
     return NULL;
 }
 
-void leMatriz(unsigned int numMatrizes, int** matrizes, char** nomesMatrizes, unsigned int numLinCol, unsigned int numThreads){
+void leMatriz(int* matriz1, int* matriz2, char* nomeMatriz1, char* nomeMatriz2, unsigned int numLinCol, unsigned int numThreads){
     parametrosLerGravar* parametros;
+    parametros = alocaVetorParametrosThreadsLeitura(2);
+
+    parametros[0].matriz = matriz1;
+    parametros[0].nomeArqMatriz = nomeMatriz1;
+    parametros[0].numLinCol = numLinCol;
+
+    parametros[1].matriz = matriz2;
+    parametros[1].nomeArqMatriz = nomeMatriz2;
+    parametros[1].numLinCol = numLinCol;
 
     if(numThreads == 1){
-        parametros = alocaVetorParametrosThreadsLeitura(1);
-        parametros[0].matriz = matrizes[0];
-        parametros[0].nomeArqMatriz = nomesMatrizes[0];
-        parametros[0].numLinCol = numLinCol;
-
         threadLeMatriz((void*) &parametros[0]);
-
-        if(numMatrizes == 2){
-            parametros[0].matriz = matrizes[1];
-            parametros[0].nomeArqMatriz = nomesMatrizes[1];
-            parametros[0].numLinCol = numLinCol;
-
-            threadLeMatriz((void*) &parametros[0]);
-        }
-        
+        threadLeMatriz((void*) &parametros[1]);
     }else{
         int err;
         pthread_t* idsThreads;
 
-        parametros = alocaVetorParametrosThreadsLeitura(2);
         idsThreads = alocaVetorIdsThreads(2);
 
-        for(unsigned int i=0; i<2; i++){
-            parametros[i].matriz = matrizes[i];
-            parametros[i].nomeArqMatriz = nomesMatrizes[i];
-            parametros[i].numLinCol = numLinCol;
+        err = pthread_create(&idsThreads[0], NULL, threadLeMatriz, (void*) &parametros[0]); 
+        if(err != 0){
+            fprintf(stderr, "Erro na criacao do thread de leitura.\n");
+            exit(EXIT_FAILURE);
+        }
 
-            err = pthread_create(&idsThreads[i], NULL, threadLeMatriz, (void*) &parametros[i]); 
-            if(err != 0){
-                fprintf(stderr, "Erro na criacao do thread de leitura.\n");
-                exit(EXIT_FAILURE);
-            }
+        err = pthread_create(&idsThreads[1], NULL, threadLeMatriz, (void*) &parametros[1]); 
+        if(err != 0){
+            fprintf(stderr, "Erro na criacao do thread de leitura.\n");
+            exit(EXIT_FAILURE);
         }
 
         for(unsigned int i=0; i<2; i++){
@@ -217,6 +213,7 @@ void* threadGravaMatriz(void* args){
     
     if(arq==NULL){
         fprintf(stderr, "Problemas ao abrir o arquivo %s.\n", nomeArq);
+        exit(EXIT_FAILURE);
     }
 
     for(register int i=0; i<numLinCol; i++){

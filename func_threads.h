@@ -20,7 +20,7 @@ parametrosLerGravar* alocaVetorParametrosThreadsLeitura(unsigned int numThreads)
 pthread_t* alocaVetorIdsThreads(unsigned int numThreads);
 
 void* threadLeMatriz(void* args);
-void leMatriz(unsigned int numMatrizes, int** matrizes, char** nomesMatrizes, unsigned int numLinCol, unsigned int numThreads);
+void leMatriz(int* matriz1, int* matriz2, char* nomeMatriz1, char* nomeMatriz2, unsigned int numLinCol, unsigned int numThreads);
 
 void* threadSoma(void* args);
 void somaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned int numLinCol, unsigned int numThreads);
