@@ -12,6 +12,7 @@ int main(int argc, char *argv[]){
     }
 
     int reducao=0;
+    // atribuicao do numero de threads e numero de linhas e colunas de acordo com os argumentos(convertidos em inteiros)
     unsigned int numThreads = atoi(argv[1]);
     unsigned int numLinCol = atoi(argv[2]);
     int *matrizA, *matrizB, *matrizC, *matrizD, *matrizE;
