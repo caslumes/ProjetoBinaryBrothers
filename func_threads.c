@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <time.h>
 
+// funcao que retorna uma matriz quadrada de dimensao numLinCol alocada dinamicamente
 int *alocaMatriz(unsigned int numLinCol){
     int* matriz;
 
@@ -19,6 +20,7 @@ int *alocaMatriz(unsigned int numLinCol){
     return matriz;
 }
 
+// funcao que retorna um vetor de parametros de leitura e gravacao alocado dinamicamente
 parametrosLerGravar *alocaVetorParametrosThreadsLeitura(unsigned int numThreads){
     parametrosLerGravar* vetor;
 
@@ -34,6 +36,7 @@ parametrosLerGravar *alocaVetorParametrosThreadsLeitura(unsigned int numThreads)
     return vetor;
 }
 
+// funcao que retorna um vetor de parametros de soma e multiplicacao alocado dinamicamente
 parametrosSomaMul *alocaVetorParametrosThreadsSomaMul(unsigned int numThreads){
     parametrosSomaMul* vetor;
 
@@ -49,6 +52,7 @@ parametrosSomaMul *alocaVetorParametrosThreadsSomaMul(unsigned int numThreads){
     return vetor;
 }
 
+// funcao que retorna um vetor de ids de threads alocado dinamicamente
 pthread_t *alocaVetorIdsThreads(unsigned int numThreads){
     pthread_t* vetor;
 
@@ -64,6 +68,7 @@ pthread_t *alocaVetorIdsThreads(unsigned int numThreads){
     return vetor;
 }
 
+// funcao para thread de leitura
 void* threadLeMatriz(void* args){
     int* matriz = ((parametrosLerGravar*) args)->matriz;
     char* nomeArq = ((parametrosLerGravar*) args)->nomeArqMatriz;
@@ -86,6 +91,8 @@ void* threadLeMatriz(void* args){
     return NULL;
 }
 
+// funcao para parametrizacao e criacao dos 2 threads de leitura
+// ou no caso de 1 thread apenas, chamada da funcao da thread de leitura 2 vezes
 void leMatriz(int* matriz1, int* matriz2, char* nomeMatriz1, char* nomeMatriz2, unsigned int numLinCol, unsigned int numThreads){
     parametrosLerGravar* parametros;
     parametros = alocaVetorParametrosThreadsLeitura(2);
@@ -133,6 +140,7 @@ void leMatriz(int* matriz1, int* matriz2, char* nomeMatriz1, char* nomeMatriz2, 
     free(parametros);
 }
 
+// funcao para thread de soma de 2 matrizes
 void* threadSoma(void* args){
     register unsigned int i, inicio, fim;
     int *matriz1, *matriz2, *matrizResultante;
@@ -150,6 +158,8 @@ void* threadSoma(void* args){
     return NULL;
 }
 
+// funcao para parametrizacao e criacao dos threads de soma
+// ou no caso de 1 thread apenas, chamada da funcao da thread de soma
 void somaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned int numLinCol, unsigned int numThreads){
     parametrosSomaMul* parametros;
     pthread_t* idsThreads;
@@ -204,6 +214,7 @@ void somaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned in
     free(idsThreads);
 }
 
+// funcao para thread de gravacao
 void* threadGravaMatriz(void* args){
     int* matriz = ((parametrosLerGravar*) args)->matriz;
     char* nomeArq = ((parametrosLerGravar*) args)->nomeArqMatriz;
@@ -226,6 +237,8 @@ void* threadGravaMatriz(void* args){
     return NULL;
 }
 
+// funcao para parametrizacao e criacao dos threads de gravacao e leitura 
+// ou no caso de 1 thread apenas, chamada da funcao da thread de gravacao e da funcao da thread de leitura
 void gravarLerMatrizes(int* matrizGravar, int* matrizLer, char* nomeArqMatrizGravar, char*nomeArqMatrizLer, unsigned int numLinCol, unsigned int numThreads){
     parametrosLerGravar* parametros;
 
@@ -274,6 +287,7 @@ void gravarLerMatrizes(int* matrizGravar, int* matrizLer, char* nomeArqMatrizGra
     free(parametros);
 }
 
+// funcao para thread de multiplicacao
 void* threadMultiplicacao(void* args){
     register unsigned int i, j, k, inicio, fim, numLinCol;
     int *matriz1, *matriz2, *matrizResultante;
@@ -298,6 +312,8 @@ void* threadMultiplicacao(void* args){
     return NULL;
 }
 
+// funcao para parametrizacao e criacao dos threads de multiplicacao
+// ou no caso de 1 thread apenas, chamada da funcao da thread de multiplicacao
 void multiplicaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsigned int numLinCol, unsigned int numThreads){
     parametrosSomaMul* parametros;
     register unsigned int numElementos;
@@ -357,6 +373,7 @@ void multiplicaMatrizes(int* matriz1, int* matriz2, int* matrizResultante, unsig
     free(parametros);
 }
 
+// funcao para thread de reducao que retorna a soma parcial
 void* threadReducao(void* args){
     register unsigned int i, inicio, fim;
     int *soma;
@@ -380,6 +397,9 @@ void* threadReducao(void* args){
     return ((void*) soma);
 }
 
+// funcao para parametrizacao e criacao dos threads de gravacao e reducao
+// ou no caso de 1 thread apenas, chamada da funcao da thread de gravacao e da funcao da thread de reducao
+// retorna o valor da reducao total e altera o valor da variavel de tempoRed com o tempo utilizado apenas para a reducao
 int gravarReduzirMatriz(int* matriz, char* nomeArqMatriz, unsigned int numLinCol, unsigned int numThreads, double *tempoRed){
     parametrosLerGravar* parametrosGravar;
     parametrosSomaMul* parametrosReducao;
