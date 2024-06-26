@@ -7,7 +7,7 @@ CC = gcc
 CFLAGS  = -g -Wall -pthread
 
 # The build target 
-TARGET = projeto
+TARGET = prog
 
 all: $(TARGET)
  
