@@ -54,7 +54,7 @@ int main(int argc, char *argv[]){
     printf("Tempo soma: %.3f segundos.\n\n", tempoSoma);
     printf("Tempo multiplicação: %.3f segundos.\n\n", tempoMultiplicacao);
     printf("Tempo redução: %.3f segundos.\n\n", tempoReducao);
-    printf("Tempo total: %.3f segundos.", tempoTotal);
+    printf("Tempo total: %.3f segundos.\n", tempoTotal);
 
     free(matrizA);
     free(matrizB);
